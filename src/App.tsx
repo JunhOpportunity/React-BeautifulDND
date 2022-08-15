@@ -1,83 +1,79 @@
 import "./styles.css";
-import { createGlobalStyle } from "styled-components";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
-import { ThemeProvider } from "styled-components";
-import { useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import ToDoList from "./components/ToDoList";
-import { hourSelector, minuteState } from "./components/atoms";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult
+} from "react-beautiful-dnd";
 
-const GlobalStyle = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap');
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, menu, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-main, menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: 100%;
-  font: inherit;
-  vertical-align: baseline;
-}
-/* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, main, menu, nav, section {
-  display: block;
-}
-/* HTML5 hidden-attribute fix for newer browsers */
-*[hidden] {
-    display: none;
-}
-body {
-  line-height: 1;
-}
-menu, ol, ul {
-  list-style: none;
-}
-blockquote, q {
-  quotes: none;
-}
-blockquote:before, blockquote:after,
-q:before, q:after {
-  content: '';
-  content: none;
-}
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-* {
-  box-sizing: border-box;
-}
-body {
-  font-family: 'Source Sans Pro', sans-serif;
-}
-a {
-  text-decoration:none;
-  color:inherit;
-}
+import styled from "styled-components";
+import { toDoState } from "./components/atoms";
+import { useRecoilState } from "recoil";
+import DragabbleCard from "./Components/DragabbleCard";
+
+const Wrapper = styled.div`
+  display: flex;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+`;
+
+const Boards = styled.div`
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(1, 1fr);
+`;
+
+const Board = styled.div`
+  padding: 20px 10px;
+  padding-top: 30px;
+  background-color: ${(props) => props.theme.boardColor};
+  border-radius: 5px;
+  min-height: 200px;
 `;
 
 export default function App() {
-  const [minutes, setMinutes] = useRecoilState(minuteState);
-  const [hours, setHours] = useRecoilState(hourSelector);
+  const [toDos, setToDos] = useRecoilState(toDoState);
+  const onDragEnd = ({ draggableId, destination, source }: DropResult) => {
+    // 얘 사용하면 이제 DND해도 원상복구 X
+    // source는 방금 건든 애의 index (= 어디서 왔는지)
+    // destination은 단어 뜻 그대로 목적지
+    setToDos((oldToDos) => {
+      const toDosCopy = [...oldToDos];
+      console.log("Delete item on", source.index);
+      console.log(toDosCopy);
+      toDosCopy.splice(source.index, 1);
+      console.log("Deleted item");
+      console.log(toDosCopy);
+      // 2) Put back the item on the destination.index
+      console.log("Put back", draggableId, "on ", destination.index);
+      toDosCopy.splice(destination?.index, 0, draggableId);
+      console.log(toDosCopy);
+      return toDosCopy;
+    });
+  };
   return (
-    <div className="App">
-      <>
-        <GlobalStyle />
-        <ToDoList />
-      </>
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Wrapper>
+        <Boards>
+          <Droppable droppableId="one">
+            {(magic) => (
+              <Board ref={magic.innerRef} {...magic.droppableProps}>
+                {toDos.map((toDo, index) => (
+                  <DragabbleCard key={toDo} index={index} toDo={toDo} />
+                ))}
+
+                {magic.placeholder}
+              </Board>
+            )}
+          </Droppable>
+          );
+        </Boards>
+      </Wrapper>
+    </DragDropContext>
   );
 }
