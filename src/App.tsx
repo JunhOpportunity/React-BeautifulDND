@@ -8,7 +8,7 @@ import {
 } from "react-beautiful-dnd";
 
 import styled from "styled-components";
-import { toDoState } from "./components/atoms";
+import { toDoState } from "./atoms";
 import { useRecoilState } from "recoil";
 import DragabbleCard from "./Components/DragabbleCard";
 import Board from "./Components/Board";
@@ -25,7 +25,7 @@ const Wrapper = styled.div`
 const Boards = styled.div`
   display: grid;
   width: 100%;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 `;
 
@@ -58,8 +58,9 @@ export default function App() {
       // same board movement check
       setToDos((allBoards) => {
         const boardCopy = [...allBoards[source.droppableId]];
+        const taskObj = boardCopy[source.index];
         boardCopy.splice(source.index, 1);
-        boardCopy.splice(destination?.index, 0, draggableId);
+        boardCopy.splice(destination?.index, 0, taskObj);
         return {
           // ...allBoards는 바꾸기 전의 모든 리스트를 반환
           // source.droppableId는 바꿀 것의 ID를 반환 (To Do, Doing, Done 중 하나)
@@ -78,13 +79,14 @@ export default function App() {
       setToDos((allBoards) => {
         // start Board (옮긴 뒤에 출발 Board에 남아있는 것 추출)
         const sourceBoard = [...allBoards[source.droppableId]];
+        const taskObj = sourceBoard[source.index];
         console.log(sourceBoard);
         // finish Board (옮긴 뒤에 도착 Board에 남아있는 것을 추출)
         const destinationBoard = [...allBoards[destination.droppableId]];
         console.log(destinationBoard);
         // Delete & Add (출발 Board에서 하나 지우고, 도착 Board에서 하나 추가)
         sourceBoard.splice(source.index, 1);
-        destinationBoard.splice(destination?.index, 0, draggableId);
+        destinationBoard.splice(destination?.index, 0, taskObj);
 
         // ???
         return {

@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
 import DragabbleCard from "./DragabbleCard";
+import { ITodo, toDoState } from "../atoms";
+import { useSetRecoilState } from "recoil";
 
 const Wrapper = styled.div`
   padding: 20px 10px;
@@ -12,6 +14,7 @@ const Wrapper = styled.div`
   min-height: 200px;
   display: flex;
   flex-direction: column;
+  box-shadow: 10px 10px 5px #4b5d67;
 `;
 
 const Title = styled.h2`
@@ -28,14 +31,18 @@ interface IAreaProps {
 
 const Area = styled.div<IAreaProps>`
   background-color: ${(props) =>
-    props.isDraggingOver ? "pink" : props.isDraggingFromThis ? "red" : "blue"};
+    props.isDraggingOver
+      ? "#576F72"
+      : props.isDraggingFromThis
+      ? "#7D9D9C"
+      : "#7D9D9C"};
   flex-grow: 1;
   transition: background-color 0.3s ease-in-out;
   padding: 20px;
 `;
 
 interface IBoardPRops {
-  toDos: string[];
+  toDos: ITodo[];
   boardId: string;
 }
 
@@ -51,15 +58,26 @@ interface IForm {
 }
 
 function Board({ toDos, boardId }: IBoardPRops) {
+  const setToDos = useSetRecoilState(toDoState);
   const { register, setValue, handleSubmit } = useForm<IForm>();
-  const onValid = (data: IForm) => {
+  const onValid = ({ toDo }: IForm) => {
+    const newToDo = {
+      id: Date.now(),
+      text: toDo
+    };
+    setToDos((allBoards) => {
+      return {
+        ...allBoards,
+        [boardId]: [...allBoards[boardId], newToDo]
+      };
+    });
     setValue("toDo", ""); // submit 할 때 마다 clear
   };
 
   // const {} = useForm();
-  // const inputRef = useRef<HTMLInputElement>(null);
+  // const inputRef = useRef<HTMLInputElement>(null); // 이건 document.querySelector()과 같다.
   // const onClick = () => {
-  //   inputRef.current?.focus();
+  //   inputRef.current?.focus(); // 이 코드를 통해 input으로 가는 것.
   //   inputRef.current?.blur();
   // };
 
@@ -84,7 +102,12 @@ function Board({ toDos, boardId }: IBoardPRops) {
             {...magic.droppableProps}
           >
             {toDos.map((toDo, index) => (
-              <DragabbleCard key={toDo} index={index} toDo={toDo} />
+              <DragabbleCard
+                key={toDo.id}
+                index={index}
+                toDoId={toDo.id}
+                toDoText={toDo.text}
+              />
             ))}
 
             {magic.placeholder}
