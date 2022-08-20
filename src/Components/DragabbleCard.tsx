@@ -25,9 +25,9 @@ function DragabbleCard({ toDoId, toDoText, index }: IDragabbleCardProps) {
           isDragging={info.isDragging}
           ref={magic.innerRef}
           {...magic.draggableProps}
-          {...magic.dragHandleProps}
         >
           {toDoText}
+          <span {...magic.dragHandleProps}>↕</span>
         </Card>
       )}
     </Draggable>

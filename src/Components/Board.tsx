@@ -69,6 +69,8 @@ function Board({ toDos, boardId }: IBoardPRops) {
       return {
         ...allBoards,
         [boardId]: [...allBoards[boardId], newToDo]
+        // 새로운게 맨 앞에 생성되게 하고 싶다면 newToDo를 맨 앞에 두고
+        // 새로운게 맨 뒤에 생성되게 하고 싶다면 newToDo를 맨 뒤에 두어라
       };
     });
     setValue("toDo", ""); // submit 할 때 마다 clear

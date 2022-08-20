@@ -25,8 +25,22 @@ const Wrapper = styled.div`
 const Boards = styled.div`
   display: grid;
   width: 100%;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+`;
+
+// Card 들면 opacity 1 (drag)
+// Card 놓으면 opacity 0 (drop)
+//
+
+const TrashCan = styled.div`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 10vh;
+  height: 10vh;
+  background-color: red;
+  transitoin: all 1s;
 `;
 
 export default function App() {
@@ -58,7 +72,7 @@ export default function App() {
       // same board movement check
       setToDos((allBoards) => {
         const boardCopy = [...allBoards[source.droppableId]];
-        const taskObj = boardCopy[source.index];
+        const taskObj = boardCopy[source.index]; // object 삭제하기 전에 저장하기
         boardCopy.splice(source.index, 1);
         boardCopy.splice(destination?.index, 0, taskObj);
         return {
@@ -98,6 +112,7 @@ export default function App() {
     }
   };
   return (
+    // onDrageEng 함수는 유저가 드래그를 끝낸 시점에 불려지는 함수
     <DragDropContext onDragEnd={onDragEnd}>
       <Wrapper>
         <Boards>
@@ -105,6 +120,7 @@ export default function App() {
             <Board boardId={boardId} key={boardId} toDos={toDos[boardId]} />
           ))}
         </Boards>
+        <TrashCan></TrashCan>
       </Wrapper>
     </DragDropContext>
   );
